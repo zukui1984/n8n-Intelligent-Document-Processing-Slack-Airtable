@@ -1,0 +1,374 @@
+{
+  "name": "Intelligent Document Processing (IDP) with Slack Alerts",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1lIgSRkooZ7s5qsXgTw3RLtpbVCVems_N",
+          "mode": "list",
+          "cachedResultName": "Incoming Contracts",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1lIgSRkooZ7s5qsXgTw3RLtpbVCVems_N"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d2cc01d5-5f2c-414f-91cf-5d44ef83bbd6",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bloy402qqYPBklCe",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "5b28da6b-e876-4ef1-8efc-1d2651187dd1",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bloy402qqYPBklCe",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "text": "Analyze this attached PDF contract. Extract the following details and output them in valid JSON format:\n\n{\n\"vendor_name\": \"Name of the company providing the license\",\n\"effective_date\": \"The effective date of the agreement\",\n\"jurisdiction\": \"The governing law location mentioned (e.g. New York, California)\"\n}\n\nIf a value is not found, write 'Unknown'.",
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "0050f37f-948f-46d6-be56-8bcfc3f560ed",
+      "name": "Analyze an image",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ANRncpQw2rtEyDEq",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b2d2f880-3a1d-4546-bc0f-dc1a9cb3c4b6",
+              "leftValue": "={{ $json.liability_cap }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        832,
+        0
+      ],
+      "id": "e2d8b267-4c2e-4914-a418-1a7b2dda5370",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "// This ensures we always have a number for liability_cap\nconst aiData = $input.first().json;\n\nreturn {\n  vendor_name: aiData.vendor_name || \"Unknown Vendor\",\n  // If cap is null/undefined, default to 0 so the If node doesn't break\n  liability_cap: typeof aiData.liability_cap === 'number' ? aiData.liability_cap : 0,\n  risk_score: aiData.risk_score || 0\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "fb53101e-0037-484f-a123-f3850944113d",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "app8FcNp8OLAUCUBg",
+          "mode": "list",
+          "cachedResultName": "Contract Reviews",
+          "cachedResultUrl": "https://airtable.com/app8FcNp8OLAUCUBg"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl8Yu9ddkBHxw2Xo",
+          "mode": "list",
+          "cachedResultName": "Reviews",
+          "cachedResultUrl": "https://airtable.com/app8FcNp8OLAUCUBg/tbl8Yu9ddkBHxw2Xo"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Vendor Name": "={{ $('Code in JavaScript').item.json.vendor_name }}",
+            "Liability Cap": "={{ $('Code in JavaScript').item.json.liability_cap }}",
+            "Risk Level": "High"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Vendor Name",
+              "displayName": "Vendor Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Liability Cap",
+              "displayName": "Liability Cap",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Risk Level",
+              "displayName": "Risk Level",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "High",
+                  "value": "High"
+                },
+                {
+                  "name": "Standard",
+                  "value": "Standard"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "File Name",
+              "displayName": "File Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created At",
+              "displayName": "Created At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Attachment Summary",
+              "displayName": "Attachment Summary",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1040,
+        -96
+      ],
+      "id": "2587ef85-9eb3-4d6d-847f-a1e428e5551f",
+      "name": "Create a record",
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "7Iad94xOjbLgoTFJ",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "U0A9XESRBEE",
+          "mode": "id"
+        },
+        "text": "How can I help you? Any issues that you need assistance from us?",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        1040,
+        96
+      ],
+      "id": "4a2d3c6f-01a4-4f3b-89cc-146fb6b68adf",
+      "name": "Send a message",
+      "webhookId": "f91171c1-e296-4882-a573-651ff09bd36d",
+      "alwaysOutputData": false,
+      "credentials": {
+        "slackApi": {
+          "id": "WFdexf9DCjaeFdWp",
+          "name": "Slack account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Analyze an image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze an image": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "7bd6d180-82fb-4220-9332-82258e19369b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "91b162f257cc7a5079a528f1a84ce20a2a60a6a6bcd5e1eb459257a3c5912efa"
+  },
+  "id": "4S6xPG6Jms64xL298bXQb",
+  "tags": []
+}
