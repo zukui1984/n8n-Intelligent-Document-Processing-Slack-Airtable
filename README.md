@@ -9,7 +9,7 @@ Automated pipeline that watches a Google Drive folder for new files, downloads t
 ![n8n Workflow](https://github.com/zukui1984/n8n-Intelligent-Document-Processing-Slack-Airtable/raw/master/images/n8n_workflow.jpg)
 
 ## Slack Chatbot results
-![Slack](https://github.com/zukui1984/n8n-Intelligent-Document-Processing-Slack-Airtable/blob/master/images/slack.jpg)
+<img src="https://github.com/zukui1984/n8n-Intelligent-Document-Processing-Slack-Airtable/blob/master/images/slack.jpg" alt="diagram" width="800">
 
 ## Architecture (n8n nodes)
 1. **Google Drive Trigger** — fires when a new file is created in a target folder
@@ -38,7 +38,7 @@ Automated pipeline that watches a Google Drive folder for new files, downloads t
 - In n8n, export/download the workflow as JSON.
 - In a new n8n instance, import the JSON to recreate the workflow.
 
-![Connection](https://github.com/zukui1984/n8n-Intelligent-Document-Processing-Slack-Airtable/blob/master/images/n8n_connection.jpg)
+<img src="https://github.com/zukui1984/n8n-Intelligent-Document-Processing-Slack-Airtable/blob/master/images/n8n_connection.jpg" alt="diagram" width="500">
 
 ### 2) Google Drive credentials
 - Create/connect Google Drive credentials in n8n.
