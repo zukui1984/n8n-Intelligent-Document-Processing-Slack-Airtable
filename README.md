@@ -27,7 +27,7 @@ Automated pipeline that watches a Google Drive folder for new files, downloads t
 - Easy to extend (additional branches, channels, storage, tagging)
 
 ## Requirements
-- n8n (self-hosted / cloud)
+- n8n (self-hosted `http://localhost:5678` / cloud).
 - Google Drive account + folder to watch
 - Slack App (Bot) with correct scopes
 - Airtable base/table configured (if using the record branch)
@@ -38,9 +38,13 @@ Automated pipeline that watches a Google Drive folder for new files, downloads t
 - In n8n, export/download the workflow as JSON.
 - In a new n8n instance, import the JSON to recreate the workflow.
 
+![Connection](https://github.com/zukui1984/n8n-Intelligent-Document-Processing-Slack-Airtable/blob/master/images/n8n_connection.jpg)
+
 ### 2) Google Drive credentials
 - Create/connect Google Drive credentials in n8n.
 - Configure the Trigger to watch the intended folder.
+
+![GDrive](https://github.com/zukui1984/n8n-Intelligent-Document-Processing-Slack-Airtable/blob/master/images/Google%20Drive%20.jpg)
 
 ### 3) Slack App configuration (for alerts)
 Create a Slack App with a bot and ensure **Bot Token Scopes** include at least:
@@ -91,6 +95,8 @@ Create fields for (example):
 - `source_file_name`
 - `source_file_url`
 - `created_at`
+
+![Airtable](https://github.com/zukui1984/n8n-Intelligent-Document-Processing-Slack-Airtable/blob/master/images/airtable.jpg)
 
 ## Running / Operating
 
