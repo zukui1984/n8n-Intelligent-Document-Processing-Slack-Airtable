@@ -5,8 +5,11 @@ Automated pipeline that watches a Google Drive folder for new files, downloads t
 - Send a Slack alert message (e.g., when a condition fails / needs attention).
 
 ## Demo / Screenshots
+## n8n Workflow
+![n8n Workflow](https://github.com/zukui1984/n8n-Intelligent-Document-Processing-Slack-Airtable/raw/master/images/n8n_workflow.jpg)
 
-
+## Slack Chatbot results
+![Slack](https://github.com/zukui1984/n8n-Intelligent-Document-Processing-Slack-Airtable/blob/master/images/slack.jpg)
 
 ## Architecture (n8n nodes)
 1. **Google Drive Trigger** — fires when a new file is created in a target folder
@@ -47,10 +50,47 @@ Create a Slack App with a bot and ensure **Bot Token Scopes** include at least:
 
 After adding scopes: **Reinstall the app to the workspace** so the token includes the updated permissions.
 
-### 4) Airtable configuration (for record creation)
+### 4) Code for Javascript
+```js
+// === Example placeholder (replace with your real n8n Code node script) ===
+// Inputs typically available via `items`.
+// Goal: normalize extracted fields and compute a risk_score.
+
+return items.map(item => {
+  const data = item.json;
+
+  // Example normalization
+  const vendor_name = (data.vendor_name || "Unknown Vendor").trim();
+
+  // Example parsing
+  const liability_cap = Number(data.liability_cap || 0);
+
+  // Example scoring
+  const risk_score = Number(data.risk_score || 0);
+
+  return {
+    json: {
+      ...data,
+      vendor_name,
+      liability_cap,
+      risk_score,
+    }
+  };
+});
+```
+
+### 5) Airtable (for record creation)
 - Create an Airtable Base + Table
 - Add fields used by the workflow (example: vendor_name, risk_score, liability_cap, etc.)
 - Connect Airtable credentials in n8n and map fields in “Create a record”
+### Airtable configuration
+Create fields for (example):
+- `vendor_name`
+- `liability_cap`
+- `risk_score`
+- `source_file_name`
+- `source_file_url`
+- `created_at`
 
 ## Running / Operating
 
@@ -71,5 +111,5 @@ Toggle the workflow to **Active** so it runs automatically whenever the Google D
 - Store the analyzed results in a database for search/reporting
 - Add structured logging + metrics (execution count, failures, avg processing time)
 
-## License
-MIT (or your preferred license)
+
+
