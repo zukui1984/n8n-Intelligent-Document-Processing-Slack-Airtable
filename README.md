@@ -106,16 +106,4 @@ Use “Execute workflow” in the editor to run one test execution.
 ### Production
 Toggle the workflow to **Active** so it runs automatically whenever the Google Drive trigger fires.
 
-## Security notes
-- Do **not** commit tokens/credentials to GitHub.
-- Keep secrets in n8n Credentials (recommended) and/or environment variables.
-- If publishing publicly, scrub any screenshots that contain IDs/tokens.
-
-## Roadmap / Possible improvements
-- Add a Slack message for the “Airtable record created” (true) branch too
-- Add retries / error workflow (Error Trigger) for observability
-- Store the analyzed results in a database for search/reporting
-- Add structured logging + metrics (execution count, failures, avg processing time)
-
-
 
